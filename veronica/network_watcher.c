@@ -68,6 +68,17 @@ int scutil_listener(int* fd,pid_t* cpid){
     } //parent!
     return fd[0];
 }
+
+void fast_forward(int pipe, char* output){
+    int i = 0;
+    int n;
+    while((n=read(pipe,output,1))>0){
+        output[2] = '\0';
+        printf("loop count = %d \n",i++);
+        printf("child output \n%s\n",output);
+        fflush(stdout);
+    }
+}
 //invoke scutil
 int startup(){
     int pipe[2];
@@ -78,10 +89,20 @@ int startup(){
 
     pipe[0] = scutil_listener(pipe,&cpid); //handle pipe? fd[0] is read and open
     read(pipe[0],output,1000);
-    printf("%s child output",output);
-    fflush(stdout);
 
-    printf("%d",cpid);
+    fast_forward(pipe[0],output);
+
+    //ready to continue after flushing listener
+    int n;
+    int i = 0;
+    while((n=read(pipe[0],output,64))>0){       output[65] = '\0';
+        printf("loop count = %d \n",i++);
+        printf("child output \n%s\n",output);
+        fflush(stdout);
+    }
+
+
+    printf("child's id : %d \n",cpid);
     fflush(stdout);
     sleep(2);
     kill(cpid,SIGTERM);
