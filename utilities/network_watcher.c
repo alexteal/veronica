@@ -67,8 +67,6 @@ int scutil_listener(int* fd,pid_t* cpid){
 
     pipe(fd); // 0 is read, 1 is write
 
-    if(fcntl(fd[0], F_SETFL, O_NONBLOCK))
-        exit(2);
     *cpid = fork();
 
     if (*cpid == -1){
@@ -143,7 +141,6 @@ int startup(){
                  */
 
         }
-        sleep(5);
     }
     sleep(2);
     kill(cpid,SIGTERM);
